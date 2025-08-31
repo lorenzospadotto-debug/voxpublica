@@ -32,7 +32,6 @@ export default function AuthForm({ mode }: { mode: 'signin' | 'signup' }) {
         const { error } = await supabase.auth.signUp({ email, password })
         if (error) throw error
       }
-      // Vai in dashboard dopo login/signup riuscito
       window.location.href = '/dashboard'
     } catch (err: any) {
       setError(err?.message ?? 'Errore di autenticazione')
