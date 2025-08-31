@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import supabase from '../../lib/supabaseClient'
+import { select } from '../../lib/supaRest'
 import { StatusBadge, type DraftStatus } from '../../components/StatusBadge'
 
 type Draft = {
@@ -20,19 +20,16 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function load() {
-      setLoading(true)
-      setError(null)
-      const { data, error } = await supabase
-        .from('drafts')
-        .select('id, title, status, updated_at, created_at')
-        .order('updated_at', { ascending: false })
-      if (error) {
-        setError(error.message)
+      try {
+        setLoading(true)
+        setError(null)
+        const data = await select('drafts', 'select=id,title,status,updated_at,created_at&order=updated_at.desc')
+        setDrafts((data ?? []) as Draft[])
+      } catch (e: any) {
+        setError(e?.message ?? String(e))
+      } finally {
         setLoading(false)
-        return
       }
-      setDrafts((data ?? []) as Draft[])
-      setLoading(false)
     }
     load()
   }, [])
@@ -66,9 +63,7 @@ export default function DashboardPage() {
                     {draft.updated_at ? new Date(draft.updated_at).toLocaleString() : '—'}
                   </td>
                   <td className="px-4 py-2 text-right">
-                    <Link href={`/dashboard/drafts/${draft.id}`} className="text-blue-600 hover:underline">
-                      Apri
-                    </Link>
+                    <Link href={`/dashboard/drafts/${draft.id}`} className="text-blue-600 hover:underline">Apri</Link>
                   </td>
                 </tr>
               ))}
