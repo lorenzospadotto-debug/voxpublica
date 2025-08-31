@@ -2,7 +2,8 @@ import OpenAI from 'openai';
 import pdfParse from 'pdf-parse';
 
 export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';  // 👈 AGGIUNGI QUESTA RIGA
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
