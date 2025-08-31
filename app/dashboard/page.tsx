@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useSupabase } from '@/lib/useSupabase'
-import { StatusBadge, type DraftStatus } from '@/components/StatusBadge'
+import { useSupabase } from '../../lib/useSupabase'
+import { StatusBadge, type DraftStatus } from '../../components/StatusBadge'
 
 type Draft = {
   id: string
@@ -69,11 +69,7 @@ export default function DashboardPage() {
                     {draft.updated_at ? new Date(draft.updated_at).toLocaleString() : '—'}
                   </td>
                   <td className="px-4 py-2 text-right">
-                    {/* 👉 QUI usiamo Link **dentro** il render della lista */}
-                    <Link
-                      href={`/dashboard/drafts/${draft.id}`}
-                      className="text-blue-600 hover:underline"
-                    >
+                    <Link href={`/dashboard/drafts/${draft.id}`} className="text-blue-600 hover:underline">
                       Apri
                     </Link>
                   </td>
