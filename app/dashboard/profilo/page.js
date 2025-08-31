@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import { useSearchParams } from 'next/navigation';
+import { getSupabase } from '@/lib/supabaseClient';
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 const TONI = [
   'Istituzionale e sobrio',
@@ -14,6 +15,7 @@ const TONI = [
 ];
 
 export default function Profilo(){
+  const supabase = getSupabase();
   const search = useSearchParams();
   const first = search.get('first');
   const [user,setUser]=useState(null);
@@ -28,7 +30,7 @@ export default function Profilo(){
     if(data) setForm({
       full_name:data.full_name||'', ruolo:data.ruolo||'', ente:data.ente||'', tono:data.tono||TONI[0], tono_altro:data.tono_altro||'', samples:data.samples||''
     });
-  })();},[]);
+  })();},[supabase]);
 
   const save = async()=>{
     setBusy(true);
