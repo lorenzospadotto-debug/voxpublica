@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import supabase from '../../../../lib/supabaseClient'
+import { select } from '../../../../lib/supaRest'
 import { StatusBadge, type DraftStatus } from '../../../../components/StatusBadge'
 import StatusControls from '../../../../components/StatusControls'
 import Comments from '../../../../components/Comments'
@@ -23,21 +23,24 @@ export default function DraftView({ draftId }: { draftId: string }) {
 
   useEffect(() => {
     async function load() {
-      setLoading(true)
-      const { data, error } = await supabase
-        .from('drafts')
-        .select('id, title, content, status, created_at, updated_at')
-        .eq('id', draftId)
-        .single()
-
-      if (error) {
-        console.error(error)
-        alert(`Impossibile caricare la bozza: ${error.message}`)
+      try {
+        setLoading(true)
+        // REST ritorna un array; prendiamo il primo
+        const data = await select('drafts', `select=id,title,content,status,created_at,updated_at&id=eq.${draftId}&limit=1`)
+        const row = (data && data[0]) as Draft | undefined
+        if (!row) {
+          alert('Bozza non trovata')
+          router.push('/dashboard')
+          return
+        }
+        setDraft(row)
+      } catch (e: any) {
+        console.error(e)
+        alert(`Impossibile caricare la bozza: ${e?.message ?? e}`)
         router.push('/dashboard')
-        return
+      } finally {
+        setLoading(false)
       }
-      setDraft(data as Draft)
-      setLoading(false)
     }
     load()
   }, [draftId, router])
@@ -50,9 +53,7 @@ export default function DraftView({ draftId }: { draftId: string }) {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-xl font-semibold">{draft.title}</h1>
-          <div className="mt-1">
-            <StatusBadge status={draft.status} />
-          </div>
+          <div className="mt-1"><StatusBadge status={draft.status} /></div>
         </div>
         <StatusControls draftId={draft.id} initialStatus={draft.status} />
       </div>
