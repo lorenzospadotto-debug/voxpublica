@@ -1,10 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useSupabase } from '../lib/useSupabase'
+import supabase from '../lib/supabaseClient'
 
 export default function AuthForm({ mode }: { mode: 'signin' | 'signup' }) {
-  const supabase = useSupabase()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -14,10 +13,6 @@ export default function AuthForm({ mode }: { mode: 'signin' | 'signup' }) {
     e.preventDefault()
     setError(null)
 
-    if (!supabase) {
-      setError('Inizializzazione… riprova tra un attimo.')
-      return
-    }
     if (!email || !password) {
       setError('Inserisci email e password.')
       return
@@ -34,6 +29,7 @@ export default function AuthForm({ mode }: { mode: 'signin' | 'signup' }) {
       }
       window.location.href = '/dashboard'
     } catch (err: any) {
+      console.error(err)
       setError(err?.message ?? 'Errore di autenticazione')
     } finally {
       setLoading(false)
@@ -55,6 +51,7 @@ export default function AuthForm({ mode }: { mode: 'signin' | 'signup' }) {
           className="mt-1 w-full rounded-md border border-gray-300 p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="nome@esempio.it"
           autoComplete="email"
+          required
         />
       </label>
 
@@ -67,6 +64,7 @@ export default function AuthForm({ mode }: { mode: 'signin' | 'signup' }) {
           className="mt-1 w-full rounded-md border border-gray-300 p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="••••••••"
           autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+          required
         />
       </label>
 
@@ -74,7 +72,7 @@ export default function AuthForm({ mode }: { mode: 'signin' | 'signup' }) {
 
       <button
         type="submit"
-        disabled={!supabase || loading}
+        disabled={loading}
         className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
       >
         {loading ? 'Attendere…' : (mode === 'signin' ? 'Accedi' : 'Registrati')}
