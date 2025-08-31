@@ -1,7 +1,7 @@
 'use client'
 import React, { useState } from 'react'
 import type { DraftStatus } from './StatusBadge'
-import supabase from '../lib/supabaseClient'
+import { updateById } from '../lib/supaRest'
 
 export default function StatusControls({ draftId, initialStatus }: { draftId: string; initialStatus: DraftStatus }) {
   const [status, setStatus] = useState<DraftStatus>(initialStatus)
@@ -11,11 +11,10 @@ export default function StatusControls({ draftId, initialStatus }: { draftId: st
     const newStatus = e.target.value as DraftStatus
     setSaving(true)
     try {
-      const { error } = await supabase.from('drafts').update({ status: newStatus }).eq('id', draftId)
-      if (error) throw error
+      await updateById('drafts', draftId, { status: newStatus })
       setStatus(newStatus)
     } catch (err: any) {
-      alert(`Errore aggiornando lo stato: ${err.message ?? err}`)
+      alert(`Errore aggiornando lo stato: ${err?.message ?? err}`)
     } finally {
       setSaving(false)
     }
@@ -38,3 +37,4 @@ export default function StatusControls({ draftId, initialStatus }: { draftId: st
     </label>
   )
 }
+
