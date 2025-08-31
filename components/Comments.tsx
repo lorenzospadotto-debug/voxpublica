@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import supabase from '../lib/supabaseClient'
+import { select, insert, getUserId } from '../lib/supaRest'
 
 type Comment = { id: string; body: string; created_at: string; author_id: string }
 
@@ -11,16 +11,15 @@ export default function Comments({ draftId }: { draftId: string }) {
   const [loading, setLoading] = useState(false)
 
   async function load() {
-    const { data, error } = await supabase
-      .from('draft_comments')
-      .select('id, body, created_at, author_id')
-      .eq('draft_id', draftId)
-      .order('created_at', { ascending: true })
-    if (error) {
-      console.error(error)
-      return
+    try {
+      const data = await select(
+        'draft_comments',
+        `select=id,body,created_at,author_id&draft_id=eq.${draftId}&order=created_at.asc`
+      )
+      setComments(data ?? [])
+    } catch (e) {
+      console.error(e)
     }
-    setComments(data ?? [])
   }
 
   useEffect(() => {
@@ -33,18 +32,13 @@ export default function Comments({ draftId }: { draftId: string }) {
     if (!body.trim()) return
     setLoading(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Devi essere loggato')
-      const { error } = await supabase.from('draft_comments').insert({
-        draft_id: draftId,
-        author_id: user.id,
-        body: body.trim(),
-      })
-      if (error) throw error
+      const uid = getUserId()
+      if (!uid) throw new Error('Devi essere loggato')
+      await insert('draft_comments', [{ draft_id: draftId, author_id: uid, body: body.trim() }])
       setBody('')
       await load()
     } catch (err: any) {
-      alert(`Errore aggiungendo il commento: ${err.message ?? err}`)
+      alert(`Errore aggiungendo il commento: ${err?.message ?? err}`)
     } finally {
       setLoading(false)
     }
@@ -58,14 +52,10 @@ export default function Comments({ draftId }: { draftId: string }) {
         {comments.map((c) => (
           <li key={c.id} className="rounded-lg border border-gray-200 p-3">
             <div className="text-sm text-gray-900 whitespace-pre-wrap">{c.body}</div>
-            <div className="mt-1 text-xs text-gray-500">
-              {new Date(c.created_at).toLocaleString()}
-            </div>
+            <div className="mt-1 text-xs text-gray-500">{new Date(c.created_at).toLocaleString()}</div>
           </li>
         ))}
-        {comments.length === 0 && (
-          <li className="text-sm text-gray-500">Nessun commento ancora.</li>
-        )}
+        {comments.length === 0 && <li className="text-sm text-gray-500">Nessun commento ancora.</li>}
       </ul>
 
       <form onSubmit={addComment} className="mt-4 flex items-start gap-2">
@@ -86,3 +76,4 @@ export default function Comments({ draftId }: { draftId: string }) {
     </div>
   )
 }
+
