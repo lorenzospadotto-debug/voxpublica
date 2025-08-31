@@ -1,13 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import { useRouter } from 'next/navigation';
 import Dropzone from 'react-dropzone';
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-
 export default function UfficioStampa(){
-  const router = useRouter();
   const [user,setUser]=useState(null);
   const [profile,setProfile]=useState(null);
   const [prompt,setPrompt]=useState('Scrivimi un testo su …');
@@ -17,6 +12,8 @@ export default function UfficioStampa(){
   const [output,setOutput]=useState('');
 
   useEffect(()=>{(async()=>{
+    const { getSupabase } = await import('@/lib/supabaseClient');
+    const supabase = getSupabase();
     const { data:{ user } } = await supabase.auth.getUser();
     if(!user){ window.location.href='/'; return; }
     setUser(user);
@@ -25,7 +22,7 @@ export default function UfficioStampa(){
   })();},[]);
 
   const onDrop = (accepted) => {
-    const limited = accepted.slice(0,5); // fino a 5 file
+    const limited = accepted.slice(0,5);
     setFiles(prev=>[...prev, ...limited.map(f=>Object.assign(f,{preview:URL.createObjectURL(f)}))]);
   };
 
@@ -46,6 +43,8 @@ export default function UfficioStampa(){
   };
 
   const saveDraft = async()=>{
+    const { getSupabase } = await import('@/lib/supabaseClient');
+    const supabase = getSupabase();
     const title = prompt.slice(0,80);
     const { error } = await supabase.from('drafts').insert({ user_id:user.id, type, title, content: output });
     if(error) alert(error.message); else alert('Salvato nelle bozze');
