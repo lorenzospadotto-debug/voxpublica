@@ -1,10 +1,10 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { useSupabase } from '@/lib/useSupabase'
-import { StatusBadge, type DraftStatus } from '@/components/StatusBadge'
-import StatusControls from '@/components/StatusControls'
-import Comments from '@/components/Comments'
+import { useSupabase } from '../../../../lib/useSupabase'
+import { StatusBadge, type DraftStatus } from '../../../../components/StatusBadge'
+import StatusControls from '../../../../components/StatusControls'
+import Comments from '../../../../components/Comments'
 import { useRouter } from 'next/navigation'
 
 interface Draft {
@@ -68,4 +68,3 @@ export default function DraftView({ draftId }: { draftId: string }) {
     </div>
   )
 }
-
