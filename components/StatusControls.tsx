@@ -1,10 +1,9 @@
 'use client'
 import React, { useState } from 'react'
 import type { DraftStatus } from './StatusBadge'
-import { useSupabase } from '../lib/useSupabase'
+import supabase from '../lib/supabaseClient'
 
 export default function StatusControls({ draftId, initialStatus }: { draftId: string; initialStatus: DraftStatus }) {
-  const supabase = useSupabase()
   const [status, setStatus] = useState<DraftStatus>(initialStatus)
   const [saving, setSaving] = useState(false)
 
@@ -12,7 +11,6 @@ export default function StatusControls({ draftId, initialStatus }: { draftId: st
     const newStatus = e.target.value as DraftStatus
     setSaving(true)
     try {
-      if (!supabase) return
       const { error } = await supabase.from('drafts').update({ status: newStatus }).eq('id', draftId)
       if (error) throw error
       setStatus(newStatus)
@@ -29,7 +27,7 @@ export default function StatusControls({ draftId, initialStatus }: { draftId: st
       <select
         value={status}
         onChange={onChange}
-        disabled={!supabase || saving}
+        disabled={saving}
         className="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
       >
         <option value="draft">Bozza</option>
