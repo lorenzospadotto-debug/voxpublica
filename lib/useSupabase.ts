@@ -18,5 +18,4 @@ export function useSupabase(): SupabaseClient | null {
   return client
 }
 
-// opzionale: anche export default per compatibilità
 export default useSupabase
