@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { useSupabase } from '../../../../lib/useSupabase'
+import supabase from '../../../../lib/supabaseClient'
 import { StatusBadge, type DraftStatus } from '../../../../components/StatusBadge'
 import StatusControls from '../../../../components/StatusControls'
 import Comments from '../../../../components/Comments'
@@ -17,14 +17,12 @@ interface Draft {
 }
 
 export default function DraftView({ draftId }: { draftId: string }) {
-  const supabase = useSupabase()
   const [draft, setDraft] = useState<Draft | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
     async function load() {
-      if (!supabase) return
       setLoading(true)
       const { data, error } = await supabase
         .from('drafts')
@@ -42,9 +40,8 @@ export default function DraftView({ draftId }: { draftId: string }) {
       setLoading(false)
     }
     load()
-  }, [supabase, draftId, router])
+  }, [draftId, router])
 
-  if (!supabase) return <div className="p-6 text-sm text-gray-500">Inizializzazione…</div>
   if (loading) return <div className="p-6 text-sm text-gray-500">Caricamento bozza…</div>
   if (!draft) return null
 
