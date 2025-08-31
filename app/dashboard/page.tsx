@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useSupabase } from '../../lib/useSupabase'
+import supabase from '../../lib/supabaseClient'
 import { StatusBadge, type DraftStatus } from '../../components/StatusBadge'
 
 type Draft = {
@@ -14,14 +14,12 @@ type Draft = {
 }
 
 export default function DashboardPage() {
-  const supabase = useSupabase()
   const [drafts, setDrafts] = useState<Draft[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function load() {
-      if (!supabase) return
       setLoading(true)
       setError(null)
       const { data, error } = await supabase
@@ -37,9 +35,8 @@ export default function DashboardPage() {
       setLoading(false)
     }
     load()
-  }, [supabase])
+  }, [])
 
-  if (!supabase) return <div className="p-6 text-sm text-gray-500">Inizializzazione…</div>
   if (loading) return <div className="p-6 text-sm text-gray-500">Caricamento bozze…</div>
   if (error) return <div className="p-6 text-sm text-red-600">Errore: {error}</div>
 
