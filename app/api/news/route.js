@@ -1,5 +1,8 @@
-import Parser from 'rss-parser';
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+import Parser from 'rss-parser';
 
 const parser = new Parser();
 const FEEDS = [
