@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { getSupabase } from '@/lib/supabaseClient';
 
 const TONI = [
   'Istituzionale e sobrio',
@@ -12,7 +11,6 @@ const TONI = [
 ];
 
 export default function Profilo(){
-  const supabase = typeof window !== 'undefined' ? getSupabase() : null;
   const search = useSearchParams();
   const first = search.get('first');
   const [user,setUser]=useState(null);
@@ -20,7 +18,8 @@ export default function Profilo(){
   const [busy,setBusy]=useState(false);
 
   useEffect(()=>{(async()=>{
-    if (!supabase) return;
+    const { getSupabase } = await import('@/lib/supabaseClient');
+    const supabase = getSupabase();
     const { data:{ user } } = await supabase.auth.getUser();
     if(!user){ window.location.href='/'; return; }
     setUser(user);
@@ -28,12 +27,13 @@ export default function Profilo(){
     if(data) setForm({
       full_name:data.full_name||'', ruolo:data.ruolo||'', ente:data.ente||'', tono:data.tono||TONI[0], tono_altro:data.tono_altro||'', samples:data.samples||''
     });
-  })();},[supabase]);
+  })();},[]);
 
   const save = async()=>{
-    if (!supabase || !user) return;
     setBusy(true);
     try{
+      const { getSupabase } = await import('@/lib/supabaseClient');
+      const supabase = getSupabase();
       const payload = { id:user.id, ...form };
       const { error } = await supabase.from('profiles').upsert(payload).eq('id', user.id);
       if(error) throw error;
