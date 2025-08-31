@@ -1,18 +1,16 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { useSupabase } from '../lib/useSupabase'
+import supabase from '../lib/supabaseClient'
 
 type Comment = { id: string; body: string; created_at: string; author_id: string }
 
 export default function Comments({ draftId }: { draftId: string }) {
-  const supabase = useSupabase()
   const [comments, setComments] = useState<Comment[]>([])
   const [body, setBody] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function load() {
-    if (!supabase) return
     const { data, error } = await supabase
       .from('draft_comments')
       .select('id, body, created_at, author_id')
@@ -28,11 +26,11 @@ export default function Comments({ draftId }: { draftId: string }) {
   useEffect(() => {
     load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [supabase, draftId])
+  }, [draftId])
 
   async function addComment(e: React.FormEvent) {
     e.preventDefault()
-    if (!supabase || !body.trim()) return
+    if (!body.trim()) return
     setLoading(true)
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -79,7 +77,7 @@ export default function Comments({ draftId }: { draftId: string }) {
           rows={2}
         />
         <button
-          disabled={!supabase || loading || !body.trim()}
+          disabled={loading || !body.trim()}
           className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
         >
           Invia
