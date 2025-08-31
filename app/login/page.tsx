@@ -3,10 +3,10 @@
 import React from 'react'
 import AuthForm from '../../components/AuthForm'
 
-export default function Page() {
+export default function LoginPage() {
   return (
-    <div className="p-6">
+    <main className="p-6">
       <AuthForm mode="signin" />
-    </div>
+    </main>
   )
 }
