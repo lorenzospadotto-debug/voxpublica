@@ -3,9 +3,6 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getSupabase } from '@/lib/supabaseClient';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 const TONI = [
   'Istituzionale e sobrio',
   'Deciso e propositivo',
@@ -15,7 +12,7 @@ const TONI = [
 ];
 
 export default function Profilo(){
-  const supabase = getSupabase();
+  const supabase = typeof window !== 'undefined' ? getSupabase() : null;
   const search = useSearchParams();
   const first = search.get('first');
   const [user,setUser]=useState(null);
@@ -23,6 +20,7 @@ export default function Profilo(){
   const [busy,setBusy]=useState(false);
 
   useEffect(()=>{(async()=>{
+    if (!supabase) return;
     const { data:{ user } } = await supabase.auth.getUser();
     if(!user){ window.location.href='/'; return; }
     setUser(user);
@@ -33,6 +31,7 @@ export default function Profilo(){
   })();},[supabase]);
 
   const save = async()=>{
+    if (!supabase || !user) return;
     setBusy(true);
     try{
       const payload = { id:user.id, ...form };
