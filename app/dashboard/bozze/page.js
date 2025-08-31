@@ -1,19 +1,18 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { getSupabase } from '@/lib/supabaseClient';
 
 export default function Bozze(){
-  const supabase = typeof window !== 'undefined' ? getSupabase() : null;
   const [items,setItems]=useState([]);
   const [loading,setLoading]=useState(true);
 
   useEffect(()=>{(async()=>{
-    if (!supabase) return;
+    const { getSupabase } = await import('@/lib/supabaseClient');
+    const supabase = getSupabase();
     const { data:{ user } } = await supabase.auth.getUser();
     if(!user){ window.location.href='/'; return; }
     const { data } = await supabase.from('drafts').select('*').order('created_at',{ascending:false});
     setItems(data||[]); setLoading(false);
-  })();},[supabase]);
+  })();},[]);
 
   const copy=(t)=>navigator.clipboard.writeText(t);
 
