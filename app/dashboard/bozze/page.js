@@ -2,15 +2,13 @@
 import { useEffect, useState } from 'react';
 import { getSupabase } from '@/lib/supabaseClient';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 export default function Bozze(){
-  const supabase = getSupabase();
+  const supabase = typeof window !== 'undefined' ? getSupabase() : null;
   const [items,setItems]=useState([]);
   const [loading,setLoading]=useState(true);
 
   useEffect(()=>{(async()=>{
+    if (!supabase) return;
     const { data:{ user } } = await supabase.auth.getUser();
     if(!user){ window.location.href='/'; return; }
     const { data } = await supabase.from('drafts').select('*').order('created_at',{ascending:false});
