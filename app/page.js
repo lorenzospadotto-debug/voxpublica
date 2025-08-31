@@ -1,27 +1,28 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { getSupabase } from '@/lib/supabaseClient';
 
 export default function Landing() {
-  const supabase = typeof window !== 'undefined' ? getSupabase() : null;
-  const [mode, setMode] = useState('login'); // 'signup' | 'login'
+  const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!supabase) return;
-    supabase.auth.getSession().then(({ data }) => {
+    (async()=>{
+      const { getSupabase } = await import('@/lib/supabaseClient');
+      const supabase = getSupabase();
+      const { data } = await supabase.auth.getSession();
       if (data.session) window.location.href = '/dashboard';
-    });
-  }, [supabase]);
+    })();
+  }, []);
 
   const submit = async (e) => {
     e.preventDefault();
-    if (!supabase) return;
     setBusy(true);
     try {
+      const { getSupabase } = await import('@/lib/supabaseClient');
+      const supabase = getSupabase();
       if (mode === 'signup') {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
@@ -48,8 +49,7 @@ export default function Landing() {
             <h2 className="text-3xl font-black">VoxPublica</h2>
           </div>
           <p className="text-lg leading-relaxed mb-4">
-            L’AI che scrive <b>comunicati stampa, dichiarazioni e testi social</b> per politici e amministratori.
-            Scrivi <i>“scrivimi un testo su…”</i> e ottieni subito un testo pronto, ben formattato e coerente con il tuo tono.
+            L’AI che scrive <b>comunicati stampa, dichiarazioni e testi social</b>…
           </p>
           <ul className="list-disc ml-6 space-y-2">
             <li>Ufficio stampa per <b>Giornali / Instagram / Facebook / WhatsApp</b></li>
@@ -74,7 +74,7 @@ export default function Landing() {
               <label className="label">Password</label>
               <input className="input w-full" type="password" value={password} onChange={e=>setPassword(e.target.value)} required/>
             </div>
-            <button disabled={busy || !supabase} className="btn w-full">
+            <button disabled={busy} className="btn w-full">
               {busy? 'Attendo…' : (mode==='signup'?'Crea account':'Accedi')}
             </button>
           </form>
