@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getSupabase } from '@/lib/supabaseClient';
 
 function NewsBar(){
   const [items,setItems]=useState([]);
@@ -20,17 +19,24 @@ function NewsBar(){
 }
 
 export default function DashboardLayout({ children }){
-  const supabase = typeof window !== 'undefined' ? getSupabase() : null;
   const [ready, setReady] = useState(false);
 
   useEffect(()=>{
-    if (!supabase) return;
-    supabase.auth.getUser().then(({ data }) => {
-      if(!data.user){ window.location.href = '/'; } else { setReady(true);}
-    });
-  },[supabase]);
+    (async()=>{
+      const { getSupabase } = await import('@/lib/supabaseClient');
+      const supabase = getSupabase();
+      const { data } = await supabase.auth.getUser();
+      if(!data.user){ window.location.href = '/'; }
+      else { setReady(true); }
+    })();
+  },[]);
 
-  const logout=async()=>{ if(!supabase) return; await supabase.auth.signOut(); window.location.href='/'; };
+  const logout=async()=>{
+    const { getSupabase } = await import('@/lib/supabaseClient');
+    const supabase = getSupabase();
+    await supabase.auth.signOut();
+    window.location.href='/';
+  };
 
   if(!ready) return null;
   return (
