@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { useSupabase } from '@/lib/useSupabase'
+import { useSupabase } from '../lib/useSupabase'
 
 type Comment = { id: string; body: string; created_at: string; author_id: string }
 
