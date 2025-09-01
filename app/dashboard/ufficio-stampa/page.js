@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Dropzone from 'react-dropzone';
+import { renderTemplate } from '@/lib/template';
 
 export default function UfficioStampa(){
   const [user,setUser]=useState(null);
@@ -11,24 +12,39 @@ export default function UfficioStampa(){
   const [busy,setBusy]=useState(false);
   const [output,setOutput]=useState('');
 
+  const [templates, setTemplates] = useState([]);
+  const [templateId, setTemplateId] = useState('');
+
   useEffect(()=>{(async()=>{
     const { getSupabase } = await import('@/lib/supabaseClient');
     const supabase = getSupabase();
     const { data:{ user } } = await supabase.auth.getUser();
     if(!user){ window.location.href='/'; return; }
     setUser(user);
-    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
-    setProfile(data);
+    const [{ data: prof }, { data: tmps }] = await Promise.all([
+      supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
+      supabase.from('templates').select('id,title,body').order('created_at',{ascending:true})
+    ]);
+    setProfile(prof||{});
+    setTemplates(tmps||[]);
   })();},[]);
 
   const addFiles = (incoming=[])=>{
     const limited = incoming.slice(0,5);
     setFiles(prev=>[...prev, ...limited.map(f=>Object.assign(f,{preview:URL.createObjectURL(f)}))]);
   };
-
   const onDrop = (accepted) => addFiles(accepted);
-
   const onPick = (e) => addFiles(Array.from(e.target.files || []));
+
+  const applyTemplate = ()=>{
+    if(!templateId){ alert('Seleziona un template.'); return; }
+    const t = templates.find(x=>x.id===templateId);
+    if(!t){ alert('Template non trovato.'); return; }
+    const res = renderTemplate(t.body, profile);
+    if(!res.ok){ alert(res.error + '\nVai su Profilo/Onboarding e completa i dati.'); return; }
+    // Usiamo il template come base del prompt
+    setPrompt(res.text);
+  };
 
   const generate = async()=>{
     setBusy(true); setOutput('');
@@ -50,7 +66,7 @@ export default function UfficioStampa(){
     const { getSupabase } = await import('@/lib/supabaseClient');
     const supabase = getSupabase();
     const title = prompt.slice(0,80);
-    const { error } = await supabase.from('drafts').insert({ user_id:user.id, type, title, content: output });
+    const { data, error } = await supabase.from('drafts').insert({ user_id:user.id, type, title, content: output }).select().single();
     if(error) alert(error.message); else alert('Salvato nelle bozze');
   };
 
@@ -72,16 +88,27 @@ export default function UfficioStampa(){
               <option value="whatsapp">WhatsApp</option>
             </select>
 
+            {/* Selettore Template */}
+            <div className="mt-4">
+              <label className="label">Template comunicato</label>
+              <div className="flex gap-2">
+                <select className="input w-full" value={templateId} onChange={e=>setTemplateId(e.target.value)}>
+                  <option value="">— Nessuno</option>
+                  {templates.map(t => <option key={t.id} value={t.id}>{t.title}</option>)}
+                </select>
+                <button type="button" className="btn" onClick={applyTemplate}>Applica</button>
+              </div>
+            </div>
+
+            {/* Upload */}
             <div className="mt-4">
               <label className="label">Carica file</label>
-              {/* Pulsante Upload (mobile-friendly) */}
               <input type="file" multiple accept=".pdf,.txt" onChange={onPick} className="input w-full" />
-              {/* Drag & Drop */}
               <Dropzone onDrop={onDrop} multiple>
                 {({getRootProps, getInputProps, isDragActive}) => (
                   <div {...getRootProps()} className={`border-2 border-dashed rounded-xl p-6 text-center mt-2 ${isDragActive? 'bg-orange-50':'bg-white'}`}>
                     <input {...getInputProps()} />
-                    Trascina file o clicca per selezionare (PDF/TXT). Verranno usati come base informativa.
+                    Trascina file o clicca per selezionare (PDF/TXT).
                   </div>
                 )}
               </Dropzone>
@@ -110,3 +137,4 @@ export default function UfficioStampa(){
     </div>
   );
 }
+
