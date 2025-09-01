@@ -1,46 +1,37 @@
-const submit = async (e) => {
-  e.preventDefault();
-  setBusy(true);
-  try {
-    const { getSupabase } = await import('@/lib/supabaseClient');
-    const supabase = getSupabase();
+// app/page.js  (SERVER)
+import Link from 'next/link';
+export const revalidate = 0;
 
-    if (mode === 'signup') {
-      const { error } = await supabase.auth.signUp({ email, password });
-      if (error) throw error;
-      alert('Controlla la mail per confermare. Poi accedi.');
-      setMode('login');
-      setBusy(false);
-      return;
-    }
-
-    // LOGIN
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
-
-    // Promozione admin se email combacia
-    const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-    const uid = data.user.id;
-
-    // recupera profilo
-    const { data: prof } = await supabase.from('profiles').select('role').eq('id', uid).maybeSingle();
-
-    if (adminEmail && data.user.email === adminEmail) {
-      // se non è già admin, promuovi
-      if (!prof || prof.role !== 'admin') {
-        await supabase.from('profiles').upsert({ id: uid, role: 'admin' }).eq('id', uid);
-      }
-    } else {
-      // utente normale: assicurati che abbia almeno 'user'
-      if (!prof || !prof.role) {
-        await supabase.from('profiles').upsert({ id: uid, role: 'user' }).eq('id', uid);
-      }
-    }
-
-    window.location.href = '/dashboard';
-  } catch (err) {
-    alert(err.message);
-  } finally {
-    setBusy(false);
-  }
-};
+export default function Home() {
+  return (
+    <main className="container-narrow py-10">
+      <section className="text-center py-10">
+        <h1 className="text-4xl md:text-5xl font-black leading-tight">
+          VoxPublica: <span className="block md:inline">aiuta la comunicazione</span>{' '}
+          <span className="block md:inline">tra politico e cittadino</span>
+        </h1>
+        <p className="mt-4 text-lg opacity-80">
+          Uno strumento semplice, moderno e <b>sociale</b> per creare comunicati, dichiarazioni e post chiari ed efficaci.
+        </p>
+        <div className="mt-6 flex gap-3 justify-center">
+          <Link href="/login" className="btn">Accedi</Link>
+          <Link href="/signup" className="btn btn-outline">Iscriviti</Link>
+        </div>
+      </section>
+      <section className="grid md:grid-cols-3 gap-4 mt-10">
+        <div className="card p-5">
+          <h3 className="font-bold">Ufficio stampa</h3>
+          <p className="text-sm mt-1 opacity-80">Da un’idea o un file, ottieni un comunicato completo (con dichiarazione).</p>
+        </div>
+        <div className="card p-5">
+          <h3 className="font-bold">Social ready</h3>
+          <p className="text-sm mt-1 opacity-80">Versioni per Instagram, Facebook e WhatsApp in un clic.</p>
+        </div>
+        <div className="card p-5">
+          <h3 className="font-bold">Tono & profilo</h3>
+          <p className="text-sm mt-1 opacity-80">Testi coerenti con ruolo, ente e stile comunicativo.</p>
+        </div>
+      </section>
+    </main>
+  );
+}
