@@ -8,8 +8,8 @@ export default function DashboardIndex(){
       const supabase = getSupabase();
       const { data: { user } } = await supabase.auth.getUser();
       if(!user){ window.location.href='/'; return; }
-      const { data } = await supabase.from('profiles').select('id').eq('id', user.id).maybeSingle();
-      if(!data){ window.location.href='/dashboard/profilo?first=1'; }
+      const { data } = await supabase.from('profiles').select('full_name').eq('id', user.id).maybeSingle();
+      if(!data || !data.full_name){ window.location.href='/onboarding'; }
       else { window.location.href='/dashboard/ufficio-stampa'; }
     })();
   },[]);
