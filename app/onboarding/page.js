@@ -1,175 +1,145 @@
 'use client';
 import { useEffect, useState } from 'react';
 
-const RUOLI = ['Sindaco', 'Vicesindaco', 'Assessore', 'Consigliere', 'Onorevole', 'Senatore', 'Presidente', 'Portavoce', 'Altro'];
-const ENTI  = ['Comune', 'Città Metropolitana', 'Provincia', 'Regione', 'Ministero', 'Parlamento', 'Partito', 'Altro'];
-const TONI  = [
-  'Istituzionale e sobrio',
-  'Deciso e propositivo',
-  'Empatico e inclusivo',
-  'Pragmatico e concreto',
-  'Battagliero e riformista'
-];
+export default function OnboardingAuth() {
+  // tab corrente
+  const [mode, setMode] = useState<'login' | 'signup'>('login');
+  // form
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
 
-export default function Onboarding(){
-  const [supabase, setSupabase] = useState(null);
-  const [user, setUser] = useState(null);
-  const [busy, setBusy] = useState(true);
-  const [form, setForm] = useState({
-    full_name: '',
-    ruolo: RUOLI[0],
-    ente: ENTI[0],
-    institutional_email: '',
-    use_profile_email: true,
-    address: '',
-    phone: '',
-    attach_contacts: true,
-    tono: TONI[0],
-    tono_altro: '',
-    samples: ''
-  });
-
-  useEffect(()=>{
-    (async()=>{
+  // se già loggato → porta a dashboard
+  useEffect(() => {
+    (async () => {
       const { getSupabase } = await import('@/lib/supabaseClient');
-      const s = getSupabase();
-      setSupabase(s);
-      const { data: { user } } = await s.auth.getUser();
-      if(!user){ window.location.href = '/'; return; }
-      setUser(user);
+      const supabase = getSupabase();
+      const { data } = await supabase.auth.getUser();
+      if (data?.user) {
+        // se già dentro, facciamo anche il check profilo
+        await postLoginRedirect(supabase, data.user.id);
+      }
+    })();
+  }, []);
 
-      // Se profilo già completato → vai in dashboard
-      const { data } = await s.from('profiles').select('*').eq('id', user.id).maybeSingle();
-      if (data && data.full_name) {
-        window.location.href = '/dashboard/ufficio-stampa';
+  const postLoginRedirect = async (supabase, uid) => {
+    try {
+      const { data: prof } = await supabase
+        .from('profiles')
+        .select('full_name, ruolo, ente, ente_nome, tono')
+        .eq('id', uid)
+        .maybeSingle();
+
+      const missing =
+        !prof ||
+        !prof.full_name ||
+        !prof.ruolo ||
+        !prof.ente ||
+        !prof.ente_nome ||
+        !prof.tono;
+
+      window.location.href = missing ? '/dashboard/profilo' : '/dashboard';
+    } catch {
+      window.location.href = '/dashboard'; // fallback
+    }
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    setError('');
+    try {
+      const { getSupabase } = await import('@/lib/supabaseClient');
+      const supabase = getSupabase();
+
+      if (mode === 'signup') {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) throw error;
+        alert('Controlla la mail per confermare la registrazione, poi torna qui per accedere.');
+        setMode('login');
+        setBusy(false);
         return;
       }
-      // Precompila email se vuoi usare quella del profilo
-      setForm(prev => ({ ...prev, institutional_email: user.email || '', use_profile_email: true }));
-      setBusy(false);
-    })();
-  },[]);
 
-  const submit = async (e)=>{
-    e.preventDefault();
-    if(!supabase || !user) return;
-    setBusy(true);
-    try{
-      const payload = {
-        id: user.id,
-        full_name: form.full_name.trim(),
-        ruolo: form.ruolo,
-        ente: form.ente,
-        ente_nome: form.ente_nome.trim(),
-        institutional_email: form.use_profile_email ? (user.email || '') : form.institutional_email.trim(),
-        address: form.address.trim(),
-        phone: form.phone.trim(),
-        attach_contacts: !!form.attach_contacts,
-        tono: form.tono,
-        tono_altro: form.tono_altro.trim(),
-        samples: form.samples
-      };
-
-      // Validazioni minime
-      if (!payload.full_name) throw new Error('Inserisci Nome e Cognome.');
-      if (!payload.institutional_email) throw new Error('Inserisci una email istituzionale (o usa quella del profilo).');
-
-      const { error } = await supabase.from('profiles').upsert(payload).eq('id', user.id);
+      // LOGIN
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
-      window.location.href = '/dashboard/ufficio-stampa';
-    }catch(err){
-      alert(err.message);
+      // niente logica admin qui
+      await postLoginRedirect(supabase, data.user.id);
+    } catch (err) {
+      setError(err.message || 'Errore');
+    } finally {
       setBusy(false);
     }
   };
 
-  if (busy) return <div className="container-narrow p-8">Carico…</div>;
-
   return (
-    <div className="container-narrow py-8">
-      <div className="card p-8">
-        <h1 className="text-2xl font-black mb-4">Benvenuto in VoxPublica</h1>
-        <p className="mb-6">Completa il tuo profilo per generare testi perfettamente coerenti con ruolo, ente e tono.</p>
+    <main className="container-narrow py-10">
+      <div className="card max-w-xl mx-auto p-6">
+        <h1 className="text-3xl font-black text-center">VoxPublica</h1>
+        <p className="text-center opacity-80 mt-1">
+          Aiuta la comunicazione tra politico e cittadino
+        </p>
 
-        <form onSubmit={submit} className="grid md:grid-cols-2 gap-6">
+        <div className="mt-6 grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            className={`btn ${mode === 'login' ? '' : 'btn-outline opacity-80'}`}
+            onClick={() => setMode('login')}
+          >
+            Accedi
+          </button>
+          <button
+            type="button"
+            className={`btn ${mode === 'signup' ? '' : 'btn-outline opacity-80'}`}
+            onClick={() => setMode('signup')}
+          >
+            Iscriviti
+          </button>
+        </div>
+
+        <form onSubmit={onSubmit} className="mt-4 space-y-3">
           <div>
-            <label className="label">Nome e Cognome *</label>
-            <input className="input w-full" value={form.full_name} onChange={e=>setForm({...form, full_name:e.target.value})} required/>
-          </div>
-
-          <div>
-            <label className="label">Ruolo</label>
-            <select className="input w-full" value={form.ruolo} onChange={e=>setForm({...form, ruolo:e.target.value})}>
-              {RUOLI.map(r => <option key={r} value={r}>{r}</option>)}
-            </select>
-          </div>
-
-          <div>
-            <label className="label">Ente</label>
-            <select className="input w-full" value={form.ente} onChange={e=>setForm({...form, ente:e.target.value})}>
-              {ENTI.map(r => <option key={r} value={r}>{r}</option>)}
-            </select>
-          </div>
-          <div className="md:col-span-2">
-            <label className="label">Nome ente</label>
-            <input className="input w-full" value={form.ente_nome} onChange={e=>setForm({...form, ente_nome:e.target.value})} placeholder="Es. Comune di Firenze" />
-          </div>
-
-          
-
-          <div>
-            <label className="label">Email istituzionale *</label>
-            <div className="flex items-center gap-2 mb-2">
-              <input id="use_profile_email" type="checkbox" checked={form.use_profile_email} onChange={e=>setForm({...form, use_profile_email: e.target.checked})}/>
-              <label htmlFor="use_profile_email">Usa la stessa email del profilo</label>
-            </div>
+            <label className="label">Email</label>
             <input
-              className="input w-full"
               type="email"
-              value={form.institutional_email}
-              onChange={e=>setForm({...form, institutional_email:e.target.value})}
-              disabled={form.use_profile_email}
+              className="input w-full"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="nome@ente.it"
+              required
+            />
+          </div>
+          <div>
+            <label className="label">Password</label>
+            <input
+              type="password"
+              className="input w-full"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
               required
             />
           </div>
 
-          <div>
-            <label className="label">Indirizzo di corrispondenza</label>
-            <input className="input w-full" value={form.address} onChange={e=>setForm({...form, address:e.target.value})}/>
-          </div>
+          {error && <div className="text-sm text-red-700 bg-red-50 p-2 rounded">{error}</div>}
 
-          <div>
-            <label className="label">Numero di telefono</label>
-            <input className="input w-full" value={form.phone} onChange={e=>setForm({...form, phone:e.target.value})}/>
-          </div>
-
-          <div>
-            <label className="label">Tono delle comunicazioni</label>
-            <select className="input w-full" value={form.tono} onChange={e=>setForm({...form, tono:e.target.value})}>
-              {TONI.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
-            <input className="input w-full mt-2" placeholder="Altro (facoltativo)" value={form.tono_altro} onChange={e=>setForm({...form, tono_altro:e.target.value})}/>
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="label">Vecchi comunicati (facoltativo)</label>
-            <textarea className="input w-full h-32" value={form.samples} onChange={e=>setForm({...form, samples:e.target.value})} placeholder="Incolla qui qualche tuo comunicato"/>
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="label">Contatti nelle comunicazioni</label>
-            <div className="flex items-center gap-2">
-              <input id="attach_contacts" type="checkbox" checked={form.attach_contacts} onChange={e=>setForm({...form, attach_contacts:e.target.checked})}/>
-              <label htmlFor="attach_contacts">Vuoi allegare i contatti alle comunicazioni?</label>
-            </div>
-          </div>
-
-          <div className="md:col-span-2">
-            <button className="btn" type="submit">SALVA E INIZIA</button>
-          </div>
+          <button className="btn w-full" disabled={busy}>
+            {busy ? 'Attendere…' : mode === 'signup' ? 'Crea account' : 'Accedi'}
+          </button>
         </form>
+
+        <div className="mt-6 p-3 rounded bg-[#FFF8F4] text-sm">
+          <div className="font-bold mb-1">Cosa succede dopo</div>
+          <ul className="list-disc ml-5 space-y-1">
+            <li>Alla prima iscrizione ricevi una mail di conferma.</li>
+            <li>Al primo accesso compili il tuo profilo (nome, ruolo, ente, <b>nome ente</b>, tono).</li>
+            <li>Potrai generare comunicati e post coerenti con il tuo profilo.</li>
+          </ul>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }
