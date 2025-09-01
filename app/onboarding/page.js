@@ -1,25 +1,24 @@
 'use client';
 import { useEffect, useState } from 'react';
 
+// Evita prerender SSG su pagina dinamica (auth), usa solo runtime
+export const dynamic = 'force-dynamic';
+
 export default function OnboardingAuth() {
-  // tab corrente
-  const [mode, setMode] = useState<'login' | 'signup'>('login');
-  // form
+  // NIENTE generic TS qui, siamo in .js
+  const [mode, setMode] = useState('login'); // 'login' | 'signup'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
-  // se già loggato → porta a dashboard
+  // se già loggato → redirect (e controllo profilo)
   useEffect(() => {
     (async () => {
       const { getSupabase } = await import('@/lib/supabaseClient');
       const supabase = getSupabase();
       const { data } = await supabase.auth.getUser();
-      if (data?.user) {
-        // se già dentro, facciamo anche il check profilo
-        await postLoginRedirect(supabase, data.user.id);
-      }
+      if (data?.user) await postLoginRedirect(supabase, data.user.id);
     })();
   }, []);
 
@@ -66,7 +65,6 @@ export default function OnboardingAuth() {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
-      // niente logica admin qui
       await postLoginRedirect(supabase, data.user.id);
     } catch (err) {
       setError(err.message || 'Errore');
