@@ -21,10 +21,14 @@ export default function UfficioStampa(){
     setProfile(data);
   })();},[]);
 
-  const onDrop = (accepted) => {
-    const limited = accepted.slice(0,5);
+  const addFiles = (incoming=[])=>{
+    const limited = incoming.slice(0,5);
     setFiles(prev=>[...prev, ...limited.map(f=>Object.assign(f,{preview:URL.createObjectURL(f)}))]);
   };
+
+  const onDrop = (accepted) => addFiles(accepted);
+
+  const onPick = (e) => addFiles(Array.from(e.target.files || []));
 
   const generate = async()=>{
     setBusy(true); setOutput('');
@@ -67,11 +71,15 @@ export default function UfficioStampa(){
               <option value="facebook">Facebook</option>
               <option value="whatsapp">WhatsApp</option>
             </select>
+
             <div className="mt-4">
-              <label className="label">Carica file (trascina qui)</label>
+              <label className="label">Carica file</label>
+              {/* Pulsante Upload (mobile-friendly) */}
+              <input type="file" multiple accept=".pdf,.txt" onChange={onPick} className="input w-full" />
+              {/* Drag & Drop */}
               <Dropzone onDrop={onDrop} multiple>
                 {({getRootProps, getInputProps, isDragActive}) => (
-                  <div {...getRootProps()} className={`border-2 border-dashed rounded-xl p-6 text-center ${isDragActive? 'bg-orange-50':'bg-white'}`}>
+                  <div {...getRootProps()} className={`border-2 border-dashed rounded-xl p-6 text-center mt-2 ${isDragActive? 'bg-orange-50':'bg-white'}`}>
                     <input {...getInputProps()} />
                     Trascina file o clicca per selezionare (PDF/TXT). Verranno usati come base informativa.
                   </div>
@@ -81,6 +89,7 @@ export default function UfficioStampa(){
                 {files.map((f,i)=> <li key={i}>• {f.name}</li>)}
               </ul>
             </div>
+
             <button className="btn w-full mt-4" onClick={generate} disabled={busy}>{busy?'Elaboro…':'Genera testo'}</button>
           </div>
         </div>
