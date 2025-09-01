@@ -31,6 +31,11 @@ export default function Home() {
           <h3 className="font-bold">Tono & profilo</h3>
           <p className="text-sm mt-1 opacity-80">Testi coerenti con ruolo, ente e stile comunicativo.</p>
         </div>
+    // dentro app/page.js
+        <div className="mt-6 flex gap-3 justify-center">
+        <Link href="/onboarding" className="btn">Accedi</Link>
+        <Link href="/onboarding" className="btn btn-outline">Iscriviti</Link>
+        </div>
       </section>
     </main>
   );
