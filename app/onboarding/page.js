@@ -110,6 +110,12 @@ export default function Onboarding(){
               {ENTI.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
           </div>
+          <div className="md:col-span-2">
+            <label className="label">Nome ente</label>
+            <input className="input w-full" value={form.ente_nome} onChange={e=>setForm({...form, ente_nome:e.target.value})} placeholder="Es. Comune di Firenze" />
+          </div>
+
+          
 
           <div>
             <label className="label">Email istituzionale *</label>
