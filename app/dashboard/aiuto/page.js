@@ -1,24 +1,38 @@
-import Link from "next/link";
-import { Home, FileText, Archive, HelpCircle } from "lucide-react"; // assicurati che HelpCircle ci sia
-
-export default function Sidebar() {
+export default function AiutoPage() {
   return (
-    <aside className="w-60 bg-[#FCE6D9] h-screen flex flex-col">
-      <div className="p-4 font-bold text-xl">VoxPublica</div>
-      <nav className="flex-1 p-2 space-y-2">
-        <Link href="/dashboard" className="flex items-center space-x-2">
-          <Home size={18} /> <span>Dashboard</span>
-        </Link>
-        <Link href="/dashboard/ufficio-stampa" className="flex items-center space-x-2">
-          <FileText size={18} /> <span>Ufficio Stampa</span>
-        </Link>
-        <Link href="/dashboard/bozze" className="flex items-center space-x-2">
-          <Archive size={18} /> <span>Bozze</span>
-        </Link>
-        <Link href="/dashboard/aiuto" className="flex items-center space-x-2">
-          <HelpCircle size={18} /> <span>Aiuto</span>
-        </Link>
-      </nav>
-    </aside>
+    <div className="container-narrow py-8">
+      <div className="card p-8 space-y-4">
+        <img src="/aiuto-banner.png" alt="VoxPublica Aiuto" className="w-full mb-2 rounded-lg shadow" />
+        <h1 className="text-2xl font-black">Come usare VoxPublica</h1>
+        <p>
+          VoxPublica è pensata per rendere semplice la comunicazione tra politico e cittadino.
+          Anche se non hai esperienza con la tecnologia, puoi creare testi per la stampa,
+          i social o WhatsApp in pochi clic.
+        </p>
+
+        <h2 className="text-xl font-bold mt-4">Come si usa</h2>
+        <ol className="list-decimal ml-6 space-y-2">
+          <li><b>Profilo:</b> compila i tuoi dati al primo accesso (ruolo, ente e <b>nome ente</b>).</li>
+          <li><b>Ufficio Stampa:</b> scrivi un’idea o carica un file; VoxPublica lo trasforma in comunicato.</li>
+          <li><b>Formato:</b> scegli Giornale (con dichiarazione), Instagram, Facebook o WhatsApp.</li>
+          <li><b>Genera testo</b> → poi <b>Copia</b> o <b>Salva</b> in Bozze.</li>
+          <li><b>Bozze/Archivio:</b> ritrovi tutto quello che hai creato.</li>
+        </ol>
+
+        <h2 className="text-xl font-bold mt-4">Consigli</h2>
+        <ul className="list-disc ml-6 space-y-2">
+          <li>Per i giornali, inserisci sempre una <b>dichiarazione</b>.</li>
+          <li>Per i social puoi usare <b>emoji</b>. Per i comunicati, no.</li>
+          <li>Più informazioni dai (anche con file), meglio verrà il testo.</li>
+        </ul>
+
+        <h2 className="text-xl font-bold mt-4">Problemi comuni</h2>
+        <ul className="list-disc ml-6 space-y-2">
+          <li><b>Non entro:</b> controlla la mail di conferma iscrizione.</li>
+          <li><b>Non genera:</b> assicurati di aver scritto cosa vuoi dire.</li>
+          <li><b>Serve aiuto?</b> Rispondi alla mail di registrazione.</li>
+        </ul>
+      </div>
+    </div>
   );
 }
