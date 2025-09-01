@@ -60,6 +60,7 @@ export default function Onboarding(){
         full_name: form.full_name.trim(),
         ruolo: form.ruolo,
         ente: form.ente,
+        ente_nome: form.ente_nome.trim(),
         institutional_email: form.use_profile_email ? (user.email || '') : form.institutional_email.trim(),
         address: form.address.trim(),
         phone: form.phone.trim(),
