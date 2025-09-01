@@ -49,7 +49,7 @@ export default function Landing() {
             <h2 className="text-3xl font-black">VoxPublica</h2>
           </div>
           <p className="text-lg leading-relaxed mb-4">
-            L’AI che scrive <b>comunicati stampa, dichiarazioni e testi social</b>…
+            L’App che scrive <b>comunicati stampa, dichiarazioni e testi social</b> semplificando la comunicazione tra politico e cittadini…
           </p>
           <ul className="list-disc ml-6 space-y-2">
             <li>Ufficio stampa per <b>Giornali / Instagram / Facebook / WhatsApp</b></li>
