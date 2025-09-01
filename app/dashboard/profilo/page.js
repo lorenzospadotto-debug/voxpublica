@@ -59,6 +59,15 @@ export default function Profilo(){
           <div>
             <label className="label">Ente</label>
             <input className="input w-full" value={form.ente} onChange={e=>setForm({...form,ente:e.target.value})}/>
+          <label className="block mt-4">
+          <span className="text-sm font-medium">Nome ente</span>
+          <input
+            type="text"
+            name="ente_nome"
+            className="mt-1 block w-full border rounded p-2"
+            placeholder="Es. Comune di Firenze"
+            />
+          </label>
           </div>
           <div>
             <label className="label">Tono delle comunicazioni</label>
