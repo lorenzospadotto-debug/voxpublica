@@ -53,10 +53,10 @@ export default function Landing() {
           </p>
           <ul className="list-disc ml-6 space-y-2">
             <li>Ufficio stampa per <b>Giornali / Instagram / Facebook / WhatsApp</b></li>
-            <li><b>Dichiarazione</b> obbligatoria nei testi per la stampa</li>
-            <li>Upload file con <b>drag & drop</b></li>
-            <li><b>Bozze/Archivio</b> con salvataggio</li>
-            <li><b>News ticker</b> da testate italiane e internazionali</li>
+            <li><b>Crea la tua dichiarazione</b> nei testi per la stampa</li>
+            <li>Crea un testo da un file, da una delibera o altro</li>
+            <li>Fatti dare qualche idea per commentare in modo <b>diverso la tua prossima foto</b></li>
+            <li><b>News</b> da testate italiane e internazionali</li>
           </ul>
         </div>
 
