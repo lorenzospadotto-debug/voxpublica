@@ -66,40 +66,45 @@ function ProfiloInner() {
     })();
   }, []);
 
-  const save = async () => {
-    setBusy(true);
-    try {
-      const { getSupabase } = await import('@/lib/supabaseClient');
-      const supabase = getSupabase();
-      const { data: auth } = await supabase.auth.getUser();
-      if (!auth?.user) throw new Error('Non autenticato');
+  // dentro /app/dashboard/profilo/page.js
+const save = async () => {
+  setBusy(true);
+  try {
+    const { getSupabase } = await import('@/lib/supabaseClient');
+    const supabase = getSupabase();
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth?.user) throw new Error('Non autenticato');
 
-      const payload = {
-        id: auth.user.id,
-        full_name: form.full_name.trim(),
-        ruolo: form.ruolo,
-        ente: form.ente,
-        ente_nome: form.ente_nome?.trim(),
-        tono: form.tono,
-        tono_altro: form.tono_altro?.trim(),
-        // se selezionato, salvo l'email del profilo; altrimenti quella inserita
-        email_istituzionale: (form.usa_email_profilo ? profileEmail : form.email_istituzionale)?.trim(),
-        usa_email_profilo: !!form.usa_email_profilo,
-        indirizzo: form.indirizzo?.trim(),
-        telefono: form.telefono?.trim(),
-        allega_contatti: !!form.allega_contatti,
-      };
+    const payload = {
+      id: auth.user.id,
+      full_name: form.full_name?.trim(),
+      ruolo: form.ruolo || null,
+      ente: form.ente || null,
+      ente_nome: form.ente_nome?.trim() || null,
+      tono: form.tono || null,
+      tono_altro: form.tono_altro?.trim() || null,
+      email_istituzionale: form.email_istituzionale?.trim() || null,
+      usa_email_profilo: !!form.usa_email_profilo,
+      indirizzo: form.indirizzo?.trim() || null,
+      telefono: form.telefono?.trim() || null,
+      allega_contatti: !!form.allega_contatti,
+      has_onboarded: true, // <- NEW: segna l’onboarding come completato
+    };
 
-      const { error } = await supabase.from('profiles').upsert(payload).eq('id', auth.user.id);
-      if (error) throw error;
-      alert('Profilo salvato');
-      window.location.href = '/dashboard';
-    } catch (e) {
-      alert(e.message);
-    } finally {
-      setBusy(false);
-    }
-  };
+    const { error } = await supabase
+      .from('profiles')
+      .upsert(payload, { onConflict: 'id' }); // resta invariato il comportamento
+    if (error) throw error;
+
+    alert('Profilo salvato');
+    window.location.href = '/dashboard'; // Ufficio Stampa
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    setBusy(false);
+  }
+};
+
 
   return (
     <div className="container-narrow py-8 space-y-6">
