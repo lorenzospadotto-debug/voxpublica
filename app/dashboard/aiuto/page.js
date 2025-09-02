@@ -2,7 +2,12 @@ export default function AiutoPage() {
   return (
     <div className="container-narrow py-8">
       <div className="card p-8 space-y-4">
-        <img src="/aiuto-banner.png" alt="VoxPublica Aiuto" className="w-full mb-2 rounded-lg shadow" />
+        {/* immagine aggiornata → banner.png */}
+        <img
+          src="/banner.png"
+          alt="VoxPublica Aiuto"
+          className="w-full mb-2 rounded-lg shadow"
+        />
         <h1 className="text-2xl font-black">Come usare VoxPublica</h1>
         <p>
           VoxPublica è pensata per rendere semplice la comunicazione tra politico e cittadino.
