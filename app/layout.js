@@ -1,16 +1,15 @@
-import './globals.css';
-import TopHeader from '@/components/TopHeader';
+// app/layout.js
+import "./globals.css";
 
 export const metadata = {
-  title: 'VoxPublica',
-  description: 'AI per comunicati stampa, dichiarazioni e testi social.',
+  title: "VoxPublica",
+  description: "Aiuta la comunicazione tra politico e cittadino",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="it">
-      <body className="bg-[#FDF9F6] text-[#1F1A17]">
-        <TopHeader />
+      <body className="min-h-screen bg-gray-50">
         {children}
       </body>
     </html>
