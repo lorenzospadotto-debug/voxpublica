@@ -53,3 +53,9 @@ figure img,
   height: auto;
   display: block;
 }
+body {
+  background-color: #fcf4e4; /* Beige del logo */
+  min-height: 100vh;
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
