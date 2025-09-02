@@ -1,41 +1,39 @@
-import Parser from 'rss-parser';
-
-export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
-const parser = new Parser();
-
-// Testate italiane + internazionali (puoi aggiungerne altre)
-const FEEDS = [
-  'https://www.ansa.it/sito/ansait_rss.xml',
-  'https://www.repubblica.it/rss/homepage/rss2.0.xml',
-  'https://feeds.bbci.co.uk/news/world/rss.xml',
-  'https://rss.cnn.com/rss/edition_world.rss',
-  'https://www.ilsole24ore.com/rss/italia.xml',
-  'https://www.reuters.com/rss/world'
-];
 
 export async function GET() {
   try {
-    // leggiamo più feed in parallelo ma ignoriamo quelli che falliscono
-    const results = await Promise.allSettled(FEEDS.map((u) => parser.parseURL(u)));
+    // Google News RSS (Italia, IT)
+    const rssUrl = 'https://news.google.com/rss?hl=it&gl=IT&ceid=IT:it';
+    const res = await fetch(rssUrl, { next: { revalidate: 300 } }); // 5 minuti
+    const xml = await res.text();
 
-    const items = results.flatMap((r) => {
-      if (r.status !== 'fulfilled') return [];
-      const srcTitle = r.value.title || 'news';
-      // prendiamo poche notizie da ciascun feed per non affollare la barra
-      return (r.value.items || []).slice(0, 5).map((it) => ({
-        source: srcTitle,
-        title: it.title,
-        link: it.link
-      }));
+    // parsing leggero dell'XML per title/link/source
+    const items = [];
+    const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+    let m;
+    while ((m = itemRegex.exec(xml)) && items.length < 25) {
+      const block = m[1];
+
+      const titleMatch = block.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>|<title>(.*?)<\/title>/);
+      const linkMatch  = block.match(/<link>(.*?)<\/link>/);
+      const sourceMatch = block.match(/<source.*?>(.*?)<\/source>/);
+
+      const rawTitle = titleMatch ? (titleMatch[1] || titleMatch[2] || '').trim() : '';
+      const cleanTitle = rawTitle.replace(/ - .+?$/, ''); // rimuove " - Testata" se incluso nel title
+      const url = linkMatch ? linkMatch[1].trim() : '';
+      const source = sourceMatch ? sourceMatch[1].trim() : '';
+
+      if (cleanTitle) items.push({ title: cleanTitle, url, source });
+    }
+
+    return new Response(JSON.stringify({ items }), {
+      headers: { 'content-type': 'application/json; charset=utf-8' },
+      status: 200,
     });
-
-    // limitiamo a 40 voci totali
-    return Response.json(items.slice(0, 40));
-  } catch {
-    // in caso di errore, restituiamo lista vuota (la UI gestisce silenziosamente)
-    return Response.json([]);
+  } catch (e) {
+    return new Response(JSON.stringify({ items: [] }), {
+      headers: { 'content-type': 'application/json; charset=utf-8' },
+      status: 200,
+    });
   }
 }
