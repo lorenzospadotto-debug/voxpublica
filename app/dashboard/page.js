@@ -134,15 +134,15 @@ export default function Home() {
       <section className="grid md:grid-cols-3 gap-4 mt-10">
         <div className="card p-5">
           <h3 className="font-bold">Ufficio stampa</h3>
-          <p className="text-sm mt-1 opacity-80">Da un’idea o un file, ottieni un comunicato completo (con dichiarazione).</p>
+          <p className="text-sm mt-1 opacity-80">Da un’idea o un file, ottieni un comunicato completo (con la tua dichiarazione).</p>
         </div>
         <div className="card p-5">
           <h3 className="font-bold">Social ready</h3>
-          <p className="text-sm mt-1 opacity-80">Genera versioni per Instagram, Facebook e WhatsApp in un clic.</p>
+          <p className="text-sm mt-1 opacity-80">Genera versioni per i Giornali, Instagram, Facebook e WhatsApp in un clic.</p>
         </div>
         <div className="card p-5">
           <h3 className="font-bold">Tono & dati profilo</h3>
-          <p className="text-sm mt-1 opacity-80">Testi coerenti con ruolo, ente e stile comunicativo.</p>
+          <p className="text-sm mt-1 opacity-80">Testi coerenti con ruolo, ente e stile comunicativo, che puoi personalizzare come vuoi.</p>
         </div>
       </section>
     </main>
