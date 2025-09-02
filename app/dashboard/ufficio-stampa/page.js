@@ -10,7 +10,7 @@ export default function UfficioStampa(){
   const [prompt,setPrompt]=useState('Scrivimi un testo su …');
   const [type,setType]=useState('giornale');
   const [files,setFiles]=useState([]);
-  const [busy,setBusy]=useState(false);
+  const [busy,setBusy]=useState([]);
   const [output,setOutput]=useState('');
 
   const [templates, setTemplates] = useState([]);
@@ -116,6 +116,7 @@ export default function UfficioStampa(){
               <ul className="mt-3 text-sm space-y-1">
                 {files.map((f,i)=> <li key={i}>• {f.name}</li>)}
               </ul>
+                <UploadedFilesList files={files} onChange={setFiles} />
             </div>
 
             <button className="btn w-full mt-4" onClick={generate} disabled={busy}>{busy?'Elaboro…':'Genera testo'}</button>
