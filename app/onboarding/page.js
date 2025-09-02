@@ -22,14 +22,22 @@ export default function OnboardingAuth() {
     })();
   }, []);
 
+  // ⬇️ MODIFICA MINIMA: controllo has_onboarded prima di ogni altra cosa
   const postLoginRedirect = async (supabase, uid) => {
     try {
       const { data: prof } = await supabase
         .from('profiles')
-        .select('full_name, ruolo, ente, ente_nome, tono')
+        .select('has_onboarded, full_name, ruolo, ente, ente_nome, tono')
         .eq('id', uid)
         .maybeSingle();
 
+      // 1) priorità al flag has_onboarded
+      if (prof && prof.has_onboarded === true) {
+        window.location.href = '/dashboard';
+        return;
+      }
+
+      // 2) fallback: se mancano i campi base → vai a completare profilo
       const missing =
         !prof ||
         !prof.full_name ||
@@ -122,7 +130,7 @@ export default function OnboardingAuth() {
             />
           </div>
 
-          {error && <div className="text-sm text-red-700 bg-red-50 p-2 rounded">{error}</div>}
+        {error && <div className="text-sm text-red-700 bg-red-50 p-2 rounded">{error}</div>}
 
           <button className="btn w-full" disabled={busy}>
             {busy ? 'Attendere…' : mode === 'signup' ? 'Crea account' : 'Accedi'}
@@ -141,3 +149,4 @@ export default function OnboardingAuth() {
     </main>
   );
 }
+
