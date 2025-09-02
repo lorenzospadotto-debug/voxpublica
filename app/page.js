@@ -41,7 +41,7 @@ export default function HomePage() {
             </h1>
             <p className="mt-3 text-center text-neutral-700"
                style={{ fontSize: 'clamp(15px, 2.2vw, 18px)' }}>
-              Uno strumento semplice, moderno e <b>sociale</b> per creare comunicati, dichiarazioni e post chiari ed efficaci.
+              L'Intelligenza Artificiale semplice, moderna e social <b>per creare comunicati, dichiarazioni e post chiari ed efficaci</b>.
             </p>
 
             {/* CTA */}
