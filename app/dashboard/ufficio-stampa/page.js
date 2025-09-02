@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import Dropzone from 'react-dropzone';
 import { renderTemplate } from '@/lib/template';
+import UploadedFilesList from '@/components/UploadedFilesList';
 
 export default function UfficioStampa(){
   const [user,setUser]=useState(null);
