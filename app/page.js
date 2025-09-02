@@ -12,12 +12,19 @@ export default function HomePage() {
           <Image
             src="/logo.png"
             alt="VoxPublica"
-            width={220}
-            height={80}
+            // dimensioni di riferimento alte (per qualità retina)
+            width={800}
+            height={320}
             priority
-            className="mx-auto"
+            // 🔥 adattivo: larghezze diverse per viewport; h-auto mantiene le proporzioni
+            sizes="(max-width: 480px) 160px,
+                   (max-width: 768px) 220px,
+                   (max-width: 1024px) 260px,
+                   300px"
+            className="mx-auto h-auto w-40 sm:w-56 md:w-64 lg:w-72 xl:w-80"
           />
         </div>
+
         <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">
           VoxPublica: <span className="text-orange-600">aiuta la comunicazione</span> tra politico e cittadino
         </h1>
