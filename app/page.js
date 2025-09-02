@@ -13,6 +13,17 @@ export default function HomePage() {
     <main className="min-h-screen bg-[#FFF6EF]">
       {/* Hero */}
       <header className="w-full">
+    <!-- Favicon classico -->
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png">
+<link rel="icon" type="image/png" sizes="180x180" href="/favicon-180.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png">
+
+<!-- iOS/Apple -->
+<link rel="apple-touch-icon" sizes="180x180" href="/favicon-180.png">
+
+<!-- Fallback per vecchi browser -->
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
         <div
           className="w-full"
           style={{
