@@ -7,7 +7,6 @@ content: [
 theme: {
 extend: {
 colors: {
-   voxbg: "#fcf4e4", // sfondo VoxPublica
 vp: {
 primary: '#E8532E',
 dark: '#1E2A33',
@@ -18,13 +17,4 @@ deep: '#0F1C24'
 },
 },
 plugins: [],
-};
-module.exports = {
-  theme: {
-    extend: {
-      colors: {
-        voxbg: "#fcf4e4", // sfondo VoxPublica
-      },
-    },
-  },
 };
